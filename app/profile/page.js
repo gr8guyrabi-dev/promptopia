@@ -24,13 +24,27 @@ const UserProfile = () => {
     }, [])
     
 
-    const handleEditClick = async (post) => {
-        router.push(`/update-prompt?prompt_id=${post._id}`)
+    const handleEditClick = (post_id) => {
+        router.push(`/update-prompt?prompt_id=${post_id.toString()}`)
         console.log('hello')
     }
 
     const handleDeleteClick = async (post_id) => {
-        console.log('hello')
+        const confirmStatus = confirm('Are you sure you want to delete this prompt?')
+        
+        if (!confirmStatus) return
+        try {
+            const response = await fetch(`/api/prompt/${post_id.toString()}`, { 
+                method: 'DELETE',
+            })
+            
+            if (!response.ok) router.push(`/profile`)
+
+            const filteredPosts = userPosts.filter(post => post._id !== post_id)
+            setUserPosts(filteredPosts)
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     return (
