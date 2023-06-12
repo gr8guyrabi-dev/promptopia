@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose'
+import mongoose, { Schema, model, models } from 'mongoose'
 
 const UserSchema = new Schema({
     email: {
@@ -15,6 +15,8 @@ const UserSchema = new Schema({
         type: String,
     }
 })
+
+export const ConvertToObjectId = mongoose.Types.ObjectId
 
 
 

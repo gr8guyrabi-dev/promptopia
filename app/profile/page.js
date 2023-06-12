@@ -2,36 +2,38 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import Profile from '@components/Profile'
 
 const UserProfile = () => {
 
-    const [userPosts, setUserPosts] = useState([])
+    const [userData, setUserData] = useState([])
     const { data: session } = useSession()
     const router = useRouter()
+    const searchParams = useSearchParams()
 
     useEffect(() => {
-        const fetchUserPosts = async () => {
-            const response = await fetch(`/api/users/${session?.user?.id}/posts`)
+        const fetchUserData = async () => {
+            const response = await fetch(`/api/users/${searchParams.get('creator_id') || session?.user?.id}/posts`)
+
+            if (!response.ok) router.push('/')
+            
             const data = await response.json()
-            setUserPosts(data)
+            setUserData(data[0])
         }
-        if (session?.user?.id) {
-            fetchUserPosts()
+        if (session?.user?.id || searchParams.get('creator_id')) {
+            fetchUserData()
         }
     }, [])
-    
 
     const handleEditClick = (post_id) => {
         router.push(`/update-prompt?prompt_id=${post_id.toString()}`)
-        console.log('hello')
     }
 
     const handleDeleteClick = async (post_id) => {
         const confirmStatus = confirm('Are you sure you want to delete this prompt?')
-        
+
         if (!confirmStatus) return
         try {
             const response = await fetch(`/api/prompt/${post_id.toString()}`, { 
@@ -40,8 +42,8 @@ const UserProfile = () => {
             
             if (!response.ok) router.push(`/profile`)
 
-            const filteredPosts = userPosts.filter(post => post._id !== post_id)
-            setUserPosts(filteredPosts)
+            const filteredPosts = userData.filter(post => post._id !== post_id)
+            setUserData(filteredPosts)
         } catch (error) {
             console.log(error)
         }
@@ -49,9 +51,9 @@ const UserProfile = () => {
 
     return (
         <Profile
-            name="My"
+            name={session?.user.id === userData._id ? "My" : userData.username}
             desc="Welcome to your personalized profile page"
-            data={userPosts}
+            userData={userData}
             handleEditClick={handleEditClick}
             handleDeleteClick={handleDeleteClick}
         />
