@@ -24,6 +24,7 @@ const Feed = () => {
     const [searchText, setSearchText] = useState('')
     const [posts, setPosts] = useState([])
     const [filteredPosts, setFilteredPosts] = useState([])
+    const [searchTimeout, setSearchTimeout] = useState(null)
 
     const handleSearchChange = (e) => {
         setSearchText(e.target.value)
@@ -34,8 +35,21 @@ const Feed = () => {
     }
 
     useEffect(() => {
-        const filteredPosts = posts.filter(post => post && post.creator?.username.includes(searchText) || post.creator?.email.includes(searchText) || post.prompt.includes(searchText) || post.tag.includes(searchText))
-        setFilteredPosts(filteredPosts)
+        if (searchTimeout) clearTimeout(searchTimeout)
+        const regex = new RegExp(searchText, 'i')
+
+        //debounce method
+        setSearchTimeout(
+            setTimeout(() => {
+                const filteredPosts = posts.filter(post => 
+                    regex.test(post.creator.name) ||
+                    regex.test(post.creator.email) ||
+                    regex.test(post.prompt) ||
+                    regex.test(post.tag) 
+                )
+                setFilteredPosts(filteredPosts)
+            }, 500)
+        )
     }, [searchText])
 
     useEffect(() => {

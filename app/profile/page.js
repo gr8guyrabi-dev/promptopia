@@ -18,7 +18,7 @@ const UserProfile = () => {
             const response = await fetch(`/api/users/${searchParams.get('creator_id') || session?.user?.id}/posts`)
 
             if (!response.ok) router.push('/')
-            
+
             const data = await response.json()
             setUserData(data[0])
         }
@@ -49,10 +49,16 @@ const UserProfile = () => {
         }
     }
 
+    const name = session?.user.id === userData._id ? "My" : userData.username
+    const desc = session?.user.id === userData._id ? 
+                "Welcome to your personalized profile page" 
+                :
+                `Welcome to ${userData.username}'s personalized profile page. Explore ${userData.username}'s exceptional prompts and be inspired by the power of their imagination.`
+
     return (
         <Profile
-            name={session?.user.id === userData._id ? "My" : userData.username}
-            desc="Welcome to your personalized profile page"
+            name={name}
+            desc={desc}
             userData={userData}
             handleEditClick={handleEditClick}
             handleDeleteClick={handleDeleteClick}
